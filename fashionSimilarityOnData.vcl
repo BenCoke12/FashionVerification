@@ -44,7 +44,7 @@ firstChoiceSneaker img =
 --need idx with sneakers in it
 --forall vs foreach?
 @property
-pulloverLowScore : Bool
+pulloverLowScore : Vector Bool n
 pulloverLowScore =
-    forall i . (firstChoiceSneaker (trainingImages ! i) and validImage (trainingImages ! i)) 
+    foreach i . (firstChoiceSneaker (trainingImages ! i) and validImage (trainingImages ! i)) 
         => score (trainingImages ! i) sandal > score (trainingImages ! i) pullover
