@@ -3,14 +3,7 @@ type Image = Tensor Rat [28, 28]
 
 type Label = Index 10
 
---Check that all Rat's in image are between 0 and 1
-validImage : Image -> Bool
-validImage x = forall i j . 0 <= x ! i ! j <= 1
-
-@network
-classifier : Image -> Vector Rat 10
-
---superclass definitions:
+--Labels
 tshirt = 0
 trouser = 1
 pullover = 2
@@ -22,15 +15,51 @@ sneaker = 7
 bag = 8
 ankleBoot = 9
 
-tops = [tshirt, pullover, dress, coat, shirt]
-shoes = [sandal, sneaker, ankleBoot]
-bottoms = [trouser]
-accessory = [bag]
+--Check that all Rat's in image are between 0 and 1
+validImage : Image -> Bool
+validImage x = forall i j . 0 <= x ! i ! j <= 1
 
--- x is an image i is a label. returns true when the classifier fits i label to x image,
+@network
+classifier : Image -> Vector Rat 10
+
+--superclass definitions:
+type Superclass = List Label
+
+tops : Superclass
+tops = [tshirt, pullover, dress, coat, shirt]
+
+shoes : Superclass
+shoes = [sandal, sneaker, ankleBoot]
+
+bottoms : Superclass
+bottoms = [trouser]
+
+accessories : Superclass
+accessories = [bag]
+
+superclasses : List Superclass
+superclasses = [tops, shoes, bottoms, accessories]
+
+--Is a label in a given superclass
+inSuperclass : Label -> List Label -> Bool
+inSuperclass label superclass = exists class in superclass . label == class
+
+--Which superclass is a label in
+--whichSuperclass : Label -> Superclass
+--whichSuperClass label = super in superclasses . inSuperclass label super
+
+--x is an image i is a label. returns true when the classifier fits i label to x image,
 --false when another label has a higher score.
 advises : Image -> Label -> Bool
-advises x i = forall j . j != i => classifier x ! i > classifier x ! j
+advises image label = forall j . j != label => classifier image ! label > classifier image ! j
+
+advisesSuperclass : Image -> Label -> Bool
+advisesSuperclass perturbedImage label =
+    --false if : the perturbed image is advised as a label in a different superclass
+    --true if : the perturbed image is advised as a label in the same superclass
+    exists super in superclasses . 
+        exists class in super . 
+            inSuperclass label super and advises perturbedImage class
 
 --epsilon ball around the image
 --epsilon parameter passed at runtime
@@ -48,7 +77,7 @@ robustAround : Image -> Label -> Bool
 robustAround image label = forall perturbation .
 	let perturbedImage = image - perturbation in
 	boundedByEpsilon perturbation and validImage perturbedImage =>
-		advises perturbedImage label
+		advisesSuperclass perturbedImage label
 
 --dataset size
 @parameter(infer=True)
