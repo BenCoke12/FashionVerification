@@ -1,0 +1,3 @@
+Verifying properties:
+    result: [91m✗[m
+Counter-example: found
