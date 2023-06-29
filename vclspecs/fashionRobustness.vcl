@@ -31,11 +31,11 @@ robustAround image label = forall perturbation .
 
 
 @dataset
-trainingImage : Vector Image 1 
+image : Vector Image 1 
 
 @dataset
-trainingLabel : Vector Label 1
+label : Vector Label 1
 
 @property
 robust : Bool
-robust = robustAround (trainingImage ! 0) (trainingLabel ! 0)
+robust = robustAround (image ! 0) (label ! 0)
