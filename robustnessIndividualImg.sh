@@ -28,23 +28,23 @@ done
 for i in {0..99..1}
 do
     start=`date +%s`
-    timeout 3600 vehicle verify --specification vclspecs/fashionRobustness.vcl --network classifier:onnxnetworks/fashion1l.onnx --parameter epsilon:0.05 --dataset image:idxdata/individuals/Image$i.idx --dataset label:idxdata/individuals/Label$i.idx --verifier Marabou --verifierLocation ../Marabou/build/Marabou > logs/fashion1l/onelayer0.01-$i.txt && echo "Completed onelayer0.01-$i" || echo "timeout onelayer0.01$i"
+    timeout 3600 vehicle verify --specification vclspecs/fashionRobustness.vcl --network classifier:onnxnetworks/fashion1l.onnx --parameter epsilon:0.05 --dataset image:idxdata/individuals/Image$i.idx --dataset label:idxdata/individuals/Label$i.idx --verifier Marabou --verifierLocation ../Marabou/build/Marabou > logs/fashion1l/onelayer0.05-$i.txt && echo "Completed onelayer0.05-$i" || echo "timeout onelayer0.05$i"
     end=`date +%s`
-    echo "Runtime on 1l-0.01-image:$i: $((end-start))" > logs/times/log1l-0.01-$i.txt
+    echo "Runtime on 1l-0.05-image:$i: $((end-start))" > logs/times/log1l-0.05-$i.txt
 done
 #epsilon 0.1
 for i in {0..99..1}
 do
     start=`date +%s`
-    timeout 3600 vehicle verify --specification vclspecs/fashionRobustness.vcl --network classifier:onnxnetworks/fashion1l.onnx --parameter epsilon:0.1 --dataset image:idxdata/individuals/Image$i.idx --dataset label:idxdata/individuals/Label$i.idx --verifier Marabou --verifierLocation ../Marabou/build/Marabou > logs/fashion1l/onelayer0.01-$i.txt && echo "Completed onelayer0.01-$i" || echo "timeout onelayer0.01$i"
+    timeout 3600 vehicle verify --specification vclspecs/fashionRobustness.vcl --network classifier:onnxnetworks/fashion1l.onnx --parameter epsilon:0.1 --dataset image:idxdata/individuals/Image$i.idx --dataset label:idxdata/individuals/Label$i.idx --verifier Marabou --verifierLocation ../Marabou/build/Marabou > logs/fashion1l/onelayer0.1-$i.txt && echo "Completed onelayer0.1-$i" || echo "timeout onelayer0.1$i"
     end=`date +%s`
-    echo "Runtime on 1l-0.01-image:$i: $((end-start))" > logs/times/log1l-0.01-$i.txt
+    echo "Runtime on 1l-0.1-image:$i: $((end-start))" > logs/times/log1l-0.1-$i.txt
 done
 #epsilon 0.5
 for i in {0..99..1}
 do
     start=`date +%s`
-    timeout 3600 vehicle verify --specification vclspecs/fashionRobustness.vcl --network classifier:onnxnetworks/fashion1l.onnx --parameter epsilon:0.5 --dataset image:idxdata/individuals/Image$i.idx --dataset label:idxdata/individuals/Label$i.idx --verifier Marabou --verifierLocation ../Marabou/build/Marabou > logs/fashion1l/onelayer0.01-$i.txt && echo "Completed onelayer0.01-$i" || echo "timeout onelayer0.01$i"
+    timeout 3600 vehicle verify --specification vclspecs/fashionRobustness.vcl --network classifier:onnxnetworks/fashion1l.onnx --parameter epsilon:0.5 --dataset image:idxdata/individuals/Image$i.idx --dataset label:idxdata/individuals/Label$i.idx --verifier Marabou --verifierLocation ../Marabou/build/Marabou > logs/fashion1l/onelayer0.5-$i.txt && echo "Completed onelayer0.5-$i" || echo "timeout onelayer0.5$i"
     end=`date +%s`
-    echo "Runtime on 1l-0.01-image:$i: $((end-start))" > logs/times/log1l-0.01-$i.txt
+    echo "Runtime on 1l-0.5-image:$i: $((end-start))" > logs/times/log1l-0.1-$i.txt
 done
