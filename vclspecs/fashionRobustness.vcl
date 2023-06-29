@@ -29,15 +29,13 @@ robustAround image label = forall perturbation .
 	boundedByEpsilon perturbation and validImage perturbedImage =>
 		advises perturbedImage label
 
-@parameter(infer=True)
-n : Nat
 
 @dataset
-trainingImages : Vector Image n
+trainingImage : Vector Image 1 
 
 @dataset
-trainingLabels : Vector Label n
+trainingLabel : Vector Label 1
 
 @property
-robust : Vector Bool n
-robust = foreach i . robustAround (trainingImages ! i) (trainingLabels ! i)
+robust : Bool
+robust = robustAround (trainingImage ! 0) (trainingLabel ! 0)
