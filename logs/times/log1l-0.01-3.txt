@@ -1,1 +1,1 @@
-Runtime on 1l-0.01-image:3: 20
+Runtime on 1l-0.01-image:3: 18
