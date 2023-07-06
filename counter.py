@@ -5,9 +5,9 @@
 #write to csv
 
 #eps=0.01
-csv01 = open("results0.01.csv", "w")
-for i in range(100):
-    filename = './logs/fashion1l32n/onelayer0.01-' + str(i) + '.txt'
+csv01 = open("moreresults0.01.csv", "w")
+for i in range(100,500,1):
+    filename = './logs/fashion1l32n/onelayer32n0.01-' + str(i) + '.txt'
 
     with open(filename) as f:
         data = f.read()
@@ -21,9 +21,9 @@ for i in range(100):
 csv01.close()
 
 #eps=0.05
-csv05 = open("results0.05.csv", "w")
-for i in range(100):
-    filename = './logs/fashion1l32n/onelayer0.05-' + str(i) + '.txt'
+csv05 = open("moreresults0.05.csv", "w")
+for i in range(100,500,1):
+    filename = './logs/fashion1l32n/onelayer32n0.05-' + str(i) + '.txt'
 
     with open(filename) as f:
         data = f.read()
@@ -37,9 +37,9 @@ for i in range(100):
 csv05.close()
 
 #eps=0.1
-csv1 = open("results0.1.csv", "w")
-for i in range(100):
-    filename = './logs/fashion1l32n/onelayer0.1-' + str(i) + '.txt'
+csv1 = open("moreresults0.1.csv", "w")
+for i in range(100,500,1):
+    filename = './logs/fashion1l32n/onelayer32n0.1-' + str(i) + '.txt'
 
     with open(filename) as f:
         data = f.read()
@@ -53,9 +53,9 @@ for i in range(100):
 csv1.close()
 
 #eps=0.5
-csv5 = open("results0.5.csv", "w")
-for i in range(100):
-    filename = './logs/fashion1l32n/onelayer0.5-' + str(i) + '.txt'
+csv5 = open("moreresults0.5.csv", "w")
+for i in range(100,500,1):
+    filename = './logs/fashion1l32n/onelayer32n0.5-' + str(i) + '.txt'
 
     with open(filename) as f:
         data = f.read()
