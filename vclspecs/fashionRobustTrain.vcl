@@ -33,7 +33,7 @@ robustAround image label = forall perturbation .
 n : Nat
 
 @dataset
-images : Vector Image n 
+images : Vector Image n
 
 @dataset
 labels : Vector Label n
