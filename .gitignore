@@ -1,3 +1,4 @@
 #vehicle compiled files
 *.vclo
 testing.sh
+test_lossdl2_tensorflow.py
