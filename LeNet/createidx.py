@@ -11,9 +11,6 @@ data = tf.keras.datasets.mnist
 train_images = tf.pad(train_images, [[0, 0], [2,2], [2,2]])/255
 test_images = tf.pad(test_images, [[0, 0], [2,2], [2,2]])/255
 
-train_images = tf.expand_dims(train_images, axis=3, name=None)
-test_images = tf.expand_dims(test_images, axis=3, name=None)
-
 print(test_images[0])
 print(test_labels[0])
 
