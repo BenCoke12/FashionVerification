@@ -16,7 +16,7 @@ model.add(keras.layers.Dense(32, activation=tf.nn.relu))
 model.add(keras.layers.Dense(10))
 
 # Load and compile Vehicle specification
-specification_filename = "fashionRobustness.vcl"
+specification_filename = "fashionRobustTrain.vcl"
 specification_path = Path(__file__).parent.parent / "vclspecs" / specification_filename
 
 # Create function to apply model
@@ -28,6 +28,7 @@ def sampler_for_perturbation(_context: Dict[str, Any]) -> Iterator[float]:
     for _ in range(0, 10):
         yield random.uniform(0.5, 0.5)
 
+
 robust = to_python(specification_path, 
                    target=Target.LOSS_DL2, 
                    samplers={"perturbation":sampler_for_perturbation})["robust"]
@@ -36,8 +37,9 @@ robust = to_python(specification_path,
 epsilon = 0.01
 
 #need to include n with the fashionRobustTrain script? can it be inferred or not?
-def robustness_loss(image, label):
-    return robust(classifier=apply_model)(epsilon=epsilon)(image=image)(label=label)
+#order of parameters matters - should match spec
+def robustness_loss(images, labels, n):
+    return robust(classifier=apply_model)(epsilon=epsilon)(n=n)(images=images)(labels=labels)
 
 
 #try to vary batch size to 32, might not be possible with fashionRobustness.vcl
@@ -77,7 +79,8 @@ for epoch in range(num_epochs):
         with tf.GradientTape() as tape:
             y_pred = model(x_batch, training=True)
             scce_loss = scce_batch_loss(y_batch, y_pred)
-            robust_loss = robustness_loss(x_batch, y_batch)
+            robust_loss = robustness_loss(x_batch, y_batch, batch_size)
+            print(robust_loss)
             weighted_loss = (scce_loss_weight * scce_loss + robustness_weight * robust_loss)
 
         gradients = tape.gradient(weighted_loss, model.trainable_weights)
