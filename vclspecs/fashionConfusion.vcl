@@ -1,9 +1,9 @@
---Sneakers() and sandals() are one group, coats() and pullovers() are another
+--Sneakers and sandals are one group, coats and pullovers are another
 --In-group confusion is ok, check that there is no cross-group confusion
 
 numberOfClasses = 10
 
---Item is a type of index over the number of classes in the dataset
+--Class is a type of index over the number of classes in the dataset
 type Class = Index numberOfClasses
 
 --The indices of the classes used in this property
