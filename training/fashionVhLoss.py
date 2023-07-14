@@ -29,8 +29,8 @@ def sampler_for_perturbation(_context: Dict[str, Any]) -> Iterator[float]:
         yield random.uniform(0.5, 0.5)
 
 
-robust = to_python(specification_path, 
-                   target=Target.LOSS_DL2, 
+robust = to_python(specification_path,
+                   target=Target.LOSS_DL2,
                    samplers={"perturbation":sampler_for_perturbation})["robust"]
 
 #need to hard code an epsilon?

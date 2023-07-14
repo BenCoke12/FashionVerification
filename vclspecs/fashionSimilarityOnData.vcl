@@ -19,20 +19,12 @@ type Score = Rat
 @network
 classifier : Image -> Vector Score numberOfClasses
 
-
 @parameter(infer=True)
 n : Nat
 
 --Declare the dataset to be used
 @dataset
-trainingImages : Vector Image n
-
---Define a valid image, i.e. one that has pixel values between 0 and 1
-validPixel : Rat -> Bool
-validPixel p = 0 <= p <= 1
-
-validImage : Image -> Bool
-validImage img = forall i j . validPixel (img ! i ! j)
+images : Vector Image n
 
 --What is the score of a class in an image
 score : Image -> Class -> Score
@@ -46,12 +38,29 @@ firstChoiceSneaker img =
     let scores = classifier img in
     forall class . class != sneaker => scores ! sneaker > scores ! class
 
+--Is the score for sandal higher than the score for pullover
+sandalGreaterThanPullover : Image -> Bool
+sandalGreaterThanPullover image =
+    score image sandal > score image pullover
+
+fullProperty : Image -> Bool
+fullProperty image = 
+    firstChoiceSneaker image => False
+    
+    --firstChoiceSneaker image => sandalGreaterThanPullover image
+    --(firstChoiceSneaker image and sandalGreaterThanPullover image) or (not(firstChoiceSneaker image) and sandalGreaterThanPullover image) or (not(firstChoiceSneaker image) and not(sandalGreaterThanPullover image))
+    --True => sandalGreaterThanPullover image
+    --False => False
+    --firstChoiceSneaker image and sandalGreaterThanPullover image
+    -- to find first choice sneaker but pullover greater than sandal use:
+    --firstChoiceSneaker image and not sandalGreaterThanPullover image
+    -- => True
+    --sandalGreaterThanPullover image
 
 --Check that for every i in the dataset, if the first choice of class is Sneaker
---and the image is a valid image then -> The score for Sandal is higher than the 
+--and the image is a valid image then -> The score for Sandal is higher than the
 --score for Pullover.
 @property
 pulloverLowScore : Vector Bool n
-pulloverLowScore =
-    foreach i . (firstChoiceSneaker (trainingImages ! i) and validImage (trainingImages ! i)) 
-        => score (trainingImages ! i) sandal > score (trainingImages ! i) pullover
+pulloverLowScore = 
+    foreach i . fullProperty (images ! i)
