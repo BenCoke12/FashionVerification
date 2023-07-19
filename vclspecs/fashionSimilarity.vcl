@@ -34,7 +34,14 @@ firstChoiceSneaker img =
     let scores = classifier img in
     forall class . class != sneaker => scores ! sneaker > scores ! class
 
+--is the score for sneaker over a threshold
+highScoreSneaker : Image -> Bool
+highScoreSneaker image =
+    let scores = classifier image in
+    scores ! sneaker > 5
+
 @property
 pulloverLowScore : Bool
-pulloverLowScore = forall img . (validImage img and firstChoiceSneaker img) 
-    => score img sandal > score img pullover
+pulloverLowScore = forall img . 
+    (validImage img and firstChoiceSneaker img and highScoreSneaker img) 
+        => score img sandal > score img pullover
