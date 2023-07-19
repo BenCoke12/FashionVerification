@@ -8,6 +8,7 @@ type Class = Index numberOfClasses
 pullover = 2
 sandal = 5
 sneaker = 7
+ankleBoot = 9
 
 --The input for the network is an image of 28 by 28 pixels
 type Image = Tensor Rat [28, 28]
@@ -43,24 +44,14 @@ sandalGreaterThanPullover : Image -> Bool
 sandalGreaterThanPullover image =
     score image sandal > score image pullover
 
-fullProperty : Image -> Bool
-fullProperty image = 
-    firstChoiceSneaker image => False
-    
-    --firstChoiceSneaker image => sandalGreaterThanPullover image
-    --(firstChoiceSneaker image and sandalGreaterThanPullover image) or (not(firstChoiceSneaker image) and sandalGreaterThanPullover image) or (not(firstChoiceSneaker image) and not(sandalGreaterThanPullover image))
-    --True => sandalGreaterThanPullover image
-    --False => False
-    --firstChoiceSneaker image and sandalGreaterThanPullover image
-    -- to find first choice sneaker but pullover greater than sandal use:
-    --firstChoiceSneaker image and not sandalGreaterThanPullover image
-    -- => True
-    --sandalGreaterThanPullover image
+--Check that if the first choice of class for the image is Sneaker then the score
+--for Sandal is greater than the score for Pullover
+similaritySneakerSandal : Image -> Bool
+similaritySneakerSandal image = 
+    firstChoiceSneaker image => sandalGreaterThanPullover image
 
---Check that for every i in the dataset, if the first choice of class is Sneaker
---and the image is a valid image then -> The score for Sandal is higher than the
---score for Pullover.
+--Check the property for every image in the given dataset
 @property
 pulloverLowScore : Vector Bool n
 pulloverLowScore = 
-    foreach i . fullProperty (images ! i)
+    foreach i . similaritySneakerSandal (images ! i)
