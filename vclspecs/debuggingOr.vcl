@@ -18,9 +18,9 @@ classifier : Image -> Vector Score numberOfClasses
 @dataset
 images : Vector Image 1
 
---A implies A
+--A or not A
 @property
 pulloverLowScore : Bool
 pulloverLowScore = 
     let scores = classifier (images ! 0) in
-    scores ! 7 > scores ! 2  => scores ! 7 > scores ! 2
+    scores ! 7 > scores ! 2 or not(scores ! 7 > scores ! 2)
