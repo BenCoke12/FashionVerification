@@ -39,6 +39,11 @@ firstChoiceSneaker img =
     let scores = classifier img in
     forall class . class != sneaker => scores ! sneaker > scores ! class
 
+--Is the score for sandal higher than the score for ankleboot
+sandalGreaterThanAnkleBoot : Image -> Bool
+sandalGreaterThanAnkleBoot image =
+    score image sandal > score image ankleBoot
+
 --Is the score for sandal higher than the score for pullover
 sandalGreaterThanPullover : Image -> Bool
 sandalGreaterThanPullover image =

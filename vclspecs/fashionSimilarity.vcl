@@ -38,7 +38,7 @@ firstChoiceSneaker img =
 highScoreSneaker : Image -> Bool
 highScoreSneaker image =
     let scores = classifier image in
-    scores ! sneaker > 5
+    scores ! sneaker > 10
 
 @property
 pulloverLowScore : Bool

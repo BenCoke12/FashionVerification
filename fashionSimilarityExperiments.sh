@@ -1,6 +1,6 @@
 vehicle --version
 #similarity
-for i in {0..1..1}
+for i in {0..499..1}
 do
     echo "Image: $i"
     start=`date +%s`
