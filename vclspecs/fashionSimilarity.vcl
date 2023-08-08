@@ -43,5 +43,5 @@ highScoreSneaker image =
 @property
 pulloverLowScore : Bool
 pulloverLowScore = forall img . 
-    (validImage img and firstChoiceSneaker img and highScoreSneaker img) 
+    (validImage img and firstChoiceSneaker img and highScoreSneaker img)
         => score img sandal > score img pullover
