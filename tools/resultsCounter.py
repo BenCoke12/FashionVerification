@@ -16,7 +16,7 @@ for epsilon in epsilons:
         with open(verificationFile) as f:
             data = f.read()
             #verification successful = 1
-            if '  robust [=========================================================] 9/9 queries' in data:
+            if 'proved no counterexample exists' in data:
                 line += str(index) + "," + str(epsilon) + ",1,"
             #counterexample found = 0
             elif 'counterexample found' in data:
