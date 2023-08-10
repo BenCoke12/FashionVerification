@@ -6,7 +6,7 @@
 #compare predicted label to the true label
 #if they are different then this is a counterexample
 #if they are the same then it is not
-#loop over 100-499 files
+#loop over 0-499 files
 #loop over each epsilon; 0.01, 0.05, 0.1, 0.5
 
 import re
@@ -16,8 +16,8 @@ import ast
 import tensorflow as tf
 from tensorflow import keras
 
-path_to_log1 = "../logs/fashion1l32n/onelayer32n0.1-100.txt" #counterexample
-path_to_log2 = "../logs/fashion1l32n/onelayer32n0.01-100.txt" #no counterexample
+path_to_log1 = "../logs/fashion1l32nB/onelayer32n0.1-100.txt" #counterexample
+path_to_log2 = "../logs/fashion1l32nB/onelayer32n0.01-100.txt" #no counterexample
 
 data = tf.keras.datasets.fashion_mnist
 
@@ -48,6 +48,13 @@ def getPrediction(counterexample):
     prediction = ortSession.run(None, ort_inputs)
     return prediction
 
+#is the counterexample a valid image
+def validImage(counterexample):
+    return True
+
+#is the counterexample epsilon distance from the original image
+def boundedByEpsilon(counterexample, index, epsilon):
+    return True
 
 def checkCounterexample(file, index, epsilon):
     f = open(file, "r")
@@ -55,9 +62,10 @@ def checkCounterexample(file, index, epsilon):
     content = f.read()
 
     if "proved no counterexample exists" in content:
-        print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " no counterexample given")
+        #print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " no counterexample given")
+        pass
     elif "counterexample found" in content:
-        counterexample = getCounterexample(content)
+        counterexample = test_images[index] - getCounterexample(content)
         prediction = getPrediction(counterexample)
         predictedLabel = np.argmax(prediction)
         trueLabel = test_labels[index]
@@ -66,9 +74,10 @@ def checkCounterexample(file, index, epsilon):
         if trueLabel == predictedLabel:
             print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " wrongly declared as counterexample")
         elif trueLabel != predictedLabel:
-            print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " correctly identified as counterexample")
-    else: 
-        print("error at i")
+            #print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " correctly identified as counterexample")
+            pass
+    else:
+        print("error at index: " + str(index) + ", epsilon: " + str(epsilon))
 
     f.close()
 
@@ -77,24 +86,10 @@ checkCounterexample(path_to_log2, 100, 0.01)
 
 print("-------------Start-------------------")
 
-#0.01
-'''
-for index in range(100,500):
-    filepath = "../logs/fashion1l32n/onelayer32n0.01-" + str(index) + ".txt" 
-    checkCounterexample(filepath, index, 0.01)
-'''
+epsilons = [0.01, 0.05, 0.1, 0.5]
 
-#0.05
-for index in range(100,500):
-    filepath = "../logs/fashion1l32n/onelayer32n0.05-" + str(index) + ".txt" 
-    checkCounterexample(filepath, index, 0.05)
-
-#0.1
-for index in range(100,500):
-    filepath = "../logs/fashion1l32n/onelayer32n0.1-" + str(index) + ".txt" 
-    checkCounterexample(filepath, index, 0.1)
-
-#0.5
-for index in range(100,500):
-    filepath = "../logs/fashion1l32n/onelayer32n0.5-" + str(index) + ".txt" 
-    checkCounterexample(filepath, index, 0.5)
+for epsilon in epsilons:
+    print("----------" + str(epsilon) + "----------")
+    for index in range(500):
+        filepath = "../logs/fashion1l32nB/onelayer32n" + str(epsilon) + "-" + str(index) + ".txt"
+        checkCounterexample(filepath, index, epsilon)
