@@ -6,6 +6,7 @@ import numpy as np
 import onnx
 import onnxruntime as ort
 import random
+from datetime import datetime
 
 data = tf.keras.datasets.fashion_mnist
 
@@ -16,7 +17,7 @@ train_images = train_images/255.0
 test_images = test_images/255.0
 
 #load model
-model = tf.keras.models.load_model('../onnxNetworks/fashion1l')
+model = tf.keras.models.load_model('../onnxNetworks/fashion1l32n')
 
 def pgdAttack(epsilon, index, iterations):
     #load image
@@ -59,10 +60,20 @@ def pgdAttack(epsilon, index, iterations):
         adversarial_image = pgd_point + signed_grad * alpha
 
         pgd_point = tf.clip_by_value(adversarial_image, image[0] - epsilon, image[0] + epsilon)
+        pgd_point = tf.clip_by_value(pgd_point, 0, 1)
 
     #np.testing.assert_allclose(pgd_point, image, rtol=0, atol=0.050001)
     if not(np.allclose(pgd_point, image, rtol=0, atol=(epsilon+0.0001))):
-        print("bad at: " + str(epsilon) + ", " + str(index))
+        print("Not in epsilon distance at: " + str(epsilon) + ", " + str(index))
+
+    #valid image criterion
+    greaterEqualThanZero = (tf.greater_equal(pgd_point, 0))
+    lessEqualThanOne = (tf.less_equal(pgd_point, 1))
+    inRange = tf.logical_and(greaterEqualThanZero, lessEqualThanOne)
+
+    viCriterion = tf.reduce_all(inRange)
+    if not(viCriterion):
+        print("Invalid image at index: " + str(index) + ", epsilon: " + str(epsilon))
 
     #predicted_label = class_labels[np.argmax(model(pgd_point))]
     #true_label = class_labels[test_labels[index]]
@@ -109,6 +120,7 @@ def pgdAttackBySample(epsilon, sample_image, sample_label, iterations):
         adversarial_image = pgd_point + signed_grad * alpha
 
         pgd_point = tf.clip_by_value(adversarial_image, image - epsilon, image + epsilon)
+        pgd_point = tf.clip_by_value(pgd_point, 0, 1) #make sure its a valid image
 
 
     #np.testing.assert_allclose(pgd_point, image, rtol=0, atol=0.050001)
@@ -127,17 +139,21 @@ def pgdAttackBySample(epsilon, sample_image, sample_label, iterations):
 #run pgd_point through onnx onnxnetwork
 #count whether same or different
 
-def massAttack():
+def massAttack(refString, network):
     #create record string
     results = "index,epsilon,outcome\n"
 
     #start runtime session
-    ortSession = ort.InferenceSession("fashion1l.onnx")
+    ortSession = ort.InferenceSession("onnxNetworks/" + str(network) + ".onnx")
 
     for epsilon in [0.01, 0.05, 0.1, 0.5]:
-        for index in range(5):
+        print(epsilon)
+        now = datetime.now()
+        print(now.time())
+
+        for index in range(500):
             #perform attack
-            pgd_point = pgdAttack(epsilon, index, 5)
+            pgd_point = pgdAttack(epsilon, index, 10)
             #sample_image = test_images[index]
             #sample_label = test_labels[index]
             #pgd_point = pgdAttackBySample(epsilon, sample_image, sample_label, 5)
@@ -158,12 +174,15 @@ def massAttack():
                 results += str(index) + "," + str(epsilon) + ",0\n"
             elif true_label != predicted_label:
                 results += str(index) + "," + str(epsilon) + ",1\n"
+                f = open("pgdCounterexamples/" + str(refString) + "/pgdCounterexample-" + str(index) + "-" + str(epsilon) + ".txt", "w")
+                f.write(str(pgd_point.numpy().tolist()))
+                f.close()
             else:
                 print("bad at: " + str(index) + "," + str(epsilon))
 
-    print(results)
+    #print(results)
     #store results in file
-    file = open("pgdAttackResults.txt", "w")
+    file = open("pgdAttack" + str(refString) + "Results.csv", "w")
     file.write(results)
     file.close()
 
@@ -176,7 +195,7 @@ def pgdTraining():
 
     #set parameters
     num_epochs = 5
-    batch_size = 64
+    batch_size = 32
 
     #setup datasets for training
     train_dataset = tf.data.Dataset.from_tensor_slices((train_images, train_labels))
@@ -192,7 +211,7 @@ def pgdTraining():
     acc_metric = keras.metrics.SparseCategoricalAccuracy()
 
     #training epochs
-    from datetime import datetime
+
     for epoch in range(num_epochs):
         print(f"\nStart of training epoch {epoch + 1}")
         counter = 0
@@ -229,7 +248,69 @@ def pgdTraining():
         train_acc = acc_metric.result()
         print(f"Accuracy over epoch: {train_acc}")
         acc_metric.reset_states()
-        model.save(f'onnxNetworks/pgdTrained')
+        model.save(f'onnxNetworks/pgdTrainedB')
 
-pgdTraining()
+def displayAdvEx(pgd_point, epsilon, predicted_label):
+      plt.figure()
+      plt.imshow(pgd_point[0])
+      #plt.title('{} \n {} : {:.2f}% Confidence'.format(description, label, confidence*100))
+      plt.title('epsilon: ' + str(epsilon) + '\n Predicted Label: ' + predicted_label)
+      plt.axis('off')
+      plt.savefig('pgd'+str(epsilon)+'.png')
+#pgdTraining()
 #massAttack()
+def imagesForReport():
+    #create ort session
+    ortSession = ort.InferenceSession("./onnxNetworks/fashion1l32n.onnx")
+
+    epsilons = [0, 0.01, 0.05, 0.1, 0.5]
+    for epsilon in epsilons:
+        index = 4
+        iterations = 50
+        pgd_point = pgdAttack(epsilon, index, iterations)
+
+        #predict image label on onnx network
+        image = np.array([np.array(row) for row in pgd_point])
+        imageForRuntime = image.astype(np.float32)
+        imageReshape = np.squeeze(np.array([imageForRuntime]), axis=0)
+        ort_inputs = {ortSession.get_inputs()[0].name: imageReshape}
+        prediction = ortSession.run(None, ort_inputs)
+
+        predicted_label = class_labels[np.argmax(prediction)]
+
+        displayAdvEx(pgd_point, epsilon, predicted_label)
+
+def attackAndLog(index, epsilon, network):
+    #start runtime session
+    ortSession = ort.InferenceSession("onnxNetworks/" + str(network) + ".onnx")
+
+    for i in range(1):
+        #get counterexample
+        pgd_point = pgdAttack(epsilon, index, 10)
+
+        #run trough onnx network
+        image = pgd_point.numpy().astype(np.float32)
+        ort_inputs = {ortSession.get_inputs()[0].name: image}
+        onnx_result = ortSession.run(None, ort_inputs)
+
+        #true and predicted labels
+        true_label = test_labels[index]
+        predicted_label = np.argmax(onnx_result)
+
+        #process Results and record outcome in string
+        # 1 : attack successful
+        # 0 : attack failed
+        if true_label == predicted_label:
+            print("Attack failed: ", i)
+        elif true_label != predicted_label:
+            print(true_label)
+            print(predicted_label)
+            #print(str(pgd_point.numpy().tolist()))
+            break
+        else:
+            print("bad at: " + str(index) + "," + str(epsilon))
+
+#imagesForReport()
+#massAttack("1l32nD", "fashion1l32n")
+#attackAndLog(43, 0.01)
+pgdTraining()
