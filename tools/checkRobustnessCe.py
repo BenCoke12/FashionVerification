@@ -62,7 +62,7 @@ def checkCounterexample(file, index, epsilon):
     content = f.read()
 
     if "proved no counterexample exists" in content:
-        #print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " no counterexample given")
+        print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " no counterexample given")
         pass
     elif "counterexample found" in content:
         counterexample = test_images[index] - getCounterexample(content)
@@ -74,7 +74,7 @@ def checkCounterexample(file, index, epsilon):
         if trueLabel == predictedLabel:
             print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " wrongly declared as counterexample")
         elif trueLabel != predictedLabel:
-            #print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " correctly identified as counterexample")
+            print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " correctly identified as counterexample")
             pass
     else:
         print("error at index: " + str(index) + ", epsilon: " + str(epsilon))
