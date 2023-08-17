@@ -3,14 +3,14 @@
 
 epsilons = [0.01, 0.05, 0.1, 0.5]
 
-results = open("../results/verificationResultspgdTrainedB.csv", "w")
+results = open("../results/verificationResultspgdTrainedD.csv", "w")
 line = 'index,epsilon,outcome,time\n'
 
 for epsilon in epsilons:
     for index in range(500):
         #files
-        verificationFile = '../logs/pgdTrainedB/onelayer32n' + str(epsilon) + '-' + str(index) + '.txt'
-        timesFile = '../logs/pgdTrainedB/times/log1l32n-' + str(epsilon) + '-' + str(index) + '.txt'
+        verificationFile = '../logs/pgdTrainedD/onelayer32n' + str(epsilon) + '-' + str(index) + '.txt'
+        timesFile = '../logs/pgdTrainedD/times/log1l32n-' + str(epsilon) + '-' + str(index) + '.txt'
         print(str(index) + " : " + str(epsilon))
         #read verification file
         with open(verificationFile) as f:
