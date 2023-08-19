@@ -1,0 +1,53 @@
+{
+  "resourcesIntegrityInfo": {
+    "specificationSummary": {
+      "name": "specification",
+      "filePath": "vclspecs/fashionSuperclassRobustness.vcl",
+      "fileHash": 3465721022930754865
+    },
+    "parameterSummaries": {
+      "epsilon": "0.05"
+    },
+    "networkSummaries": [
+      {
+        "name": "classifier",
+        "filePath": "onnxnetworks/fashion1l32n.onnx",
+        "fileHash": -7389730703686236973
+      }
+    ],
+    "datasetSummaries": [
+      {
+        "name": "trainingImages",
+        "filePath": "idxdata/individuals/Image104.idx",
+        "fileHash": 4408166973458027656
+      },
+      {
+        "name": "trainingLabels",
+        "filePath": "idxdata/individuals/Label104.idx",
+        "fileHash": 3204323520828007261
+      }
+    ]
+  },
+  "properties": [
+    [
+      "robust",
+      {
+        "tag": "MultiProperty",
+        "contents": [
+          {
+            "tag": "SingleProperty",
+            "contents": [
+              {
+                "propertyName": "robust",
+                "propertyIndices": [
+                  0
+                ]
+              },
+              []
+            ]
+          }
+        ]
+      }
+    ]
+  ]
+}
