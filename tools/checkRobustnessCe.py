@@ -15,6 +15,7 @@ import onnxruntime as ort
 import ast
 import tensorflow as tf
 from tensorflow import keras
+import idx2numpy
 
 path_to_log1 = "../logs/fashion1l32nB/onelayer32n0.1-100.txt" #counterexample
 path_to_log2 = "../logs/fashion1l32nB/onelayer32n0.01-100.txt" #no counterexample
@@ -50,11 +51,14 @@ def getPrediction(counterexample):
 
 #is the counterexample a valid image
 def validImage(counterexample):
-    return True
+    criterion = (counterexample <= 1) & (counterexample >= 0)
+    return criterion.all()
 
 #is the counterexample epsilon distance from the original image
 def boundedByEpsilon(counterexample, index, epsilon):
-    return True
+    original_image = idx2numpy.convert_from_file('../idxdata/individuals/Image' + str(index) + '.idx')[0]
+    criterion = np.allclose(original_image, counterexample, rtol=0, atol=epsilon+0.000001)
+    return criterion
 
 def checkCounterexample(file, index, epsilon):
     f = open(file, "r")
@@ -62,7 +66,7 @@ def checkCounterexample(file, index, epsilon):
     content = f.read()
 
     if "proved no counterexample exists" in content:
-        print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " no counterexample given")
+        #print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " no counterexample given")
         pass
     elif "counterexample found" in content:
         counterexample = test_images[index] - getCounterexample(content)
@@ -71,9 +75,11 @@ def checkCounterexample(file, index, epsilon):
         trueLabel = test_labels[index]
         #print("True label: ", trueLabel)
         #print("Predicted label: ", predictedLabel)
+        isValidImage = validImage(counterexample)
+        isBoundedByEpsilon = boundedByEpsilon(counterexample, index, epsilon)
         if trueLabel == predictedLabel:
             print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " wrongly declared as counterexample")
-        elif trueLabel != predictedLabel:
+        elif ((trueLabel != predictedLabel) and isValidImage and isBoundedByEpsilon):
             print("Index: " + str(index) + " with epsilon: " + str(epsilon) + " correctly identified as counterexample")
             pass
     else:
@@ -86,7 +92,7 @@ checkCounterexample(path_to_log2, 100, 0.01)
 
 print("-------------Start-------------------")
 
-epsilons = [0.01, 0.05, 0.1, 0.5]
+epsilons = [0.01]#, 0.05, 0.1, 0.5]
 
 for epsilon in epsilons:
     print("----------" + str(epsilon) + "----------")
