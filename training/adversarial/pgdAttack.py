@@ -17,9 +17,10 @@ train_images = train_images/255.0
 test_images = test_images/255.0
 
 #load model
-model = tf.keras.models.load_model('../onnxNetworks/fashion1l32n')
+#model = tf.keras.models.load_model('../onnxNetworks/fashion1l32n')
+model = tf.keras.models.load_model('onnxNetworks/pgdTrainedB')
+def pgdAttack(epsilon, index, iterations, network):
 
-def pgdAttack(epsilon, index, iterations):
     #load image
     image = tf.convert_to_tensor(test_images[index:index+1])
 
@@ -153,7 +154,7 @@ def massAttack(refString, network):
 
         for index in range(500):
             #perform attack
-            pgd_point = pgdAttack(epsilon, index, 10)
+            pgd_point = pgdAttack(epsilon, index, 10, network)
             #sample_image = test_images[index]
             #sample_label = test_labels[index]
             #pgd_point = pgdAttackBySample(epsilon, sample_image, sample_label, 5)
@@ -194,7 +195,7 @@ def pgdTraining():
     model.add(keras.layers.Dense(10))
 
     #set parameters
-    num_epochs = 5
+    num_epochs = 20
     batch_size = 32
 
     #setup datasets for training
@@ -204,11 +205,17 @@ def pgdTraining():
     train_dataset = train_dataset.shuffle(buffer_size=1024).batch(batch_size)
     test_dataset = test_dataset.batch(batch_size)
 
-    #optimiser and metrics
+    #optimiser
     optimizer = tf.keras.optimizers.Adam()
     scce_batch_loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
     pgd_batch_loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-    acc_metric = keras.metrics.SparseCategoricalAccuracy()
+
+    #metrics
+    train_acc_metric = keras.metrics.SparseCategoricalAccuracy()
+    train_loss_metric = keras.metrics.SparseCategoricalCrossentropy(from_logits=True)
+    pgd_acc_metric = keras.metrics.SparseCategoricalAccuracy()
+    pgd_loss_metric = keras.metrics.SparseCategoricalCrossentropy(from_logits=True)
+
 
     #training epochs
 
@@ -220,7 +227,7 @@ def pgdTraining():
             pgd_samples = []
 
             for sample_image, sample_label in zip(x_batch, y_batch):
-                pgd_point = pgdAttackBySample(0.02, sample_image, sample_label, 5)
+                pgd_point = pgdAttackBySample(0.01, sample_image, sample_label, 5)
                 #pgd_point = tf.zeros([28,28])
                 pgd_samples.append(tf.convert_to_tensor(pgd_point))
 
@@ -240,15 +247,30 @@ def pgdTraining():
 
                 y_pred_pgd = model(pgd_samples, training=True)
                 pgd_loss_value = pgd_batch_loss(y_batch, y_pred_pgd)
-                combined_loss = 0.5 * scce_loss_value + 0.5 * pgd_loss_value
+                combined_loss = (0.5 * scce_loss_value) + (0.5 * pgd_loss_value)
 
             gradients = tape.gradient(combined_loss, model.trainable_weights)
             optimizer.apply_gradients(zip(gradients, model.trainable_weights))
 
-        train_acc = acc_metric.result()
-        print(f"Accuracy over epoch: {train_acc}")
-        acc_metric.reset_states()
-        model.save(f'onnxNetworks/pgdTrainedB')
+            #metrics
+            train_acc_metric.update_state(y_batch, y_pred)
+            train_loss_metric.update_state(y_batch, y_pred)
+            pgd_acc_metric.update_state(y_batch, y_pred_pgd)
+            pgd_loss_metric.update_state(y_batch, y_pred_pgd)
+
+        train_acc = train_acc_metric.result()
+        train_loss = train_loss_metric.result()
+        pgd_acc = pgd_acc_metric.result()
+        pgd_loss = pgd_loss_metric.result()
+
+        print(f"Accuracy over epoch: {train_acc}, Training loss: {train_loss}, PGD accuracy: {pgd_acc}, PGD loss: {pgd_loss}")
+
+        train_acc_metric.reset_states()
+        train_loss_metric.reset_states()
+        pgd_acc_metric.reset_states()
+        pgd_loss_metric.reset_states()
+
+    model.save(f'onnxNetworks/pgdTrainedD')
 
 def displayAdvEx(pgd_point, epsilon, predicted_label):
       plt.figure()
@@ -311,6 +333,6 @@ def attackAndLog(index, epsilon, network):
             print("bad at: " + str(index) + "," + str(epsilon))
 
 #imagesForReport()
-#massAttack("1l32nD", "fashion1l32n")
+massAttack("pgdTrainedB", "pgdTrainedB")
 #attackAndLog(43, 0.01)
-pgdTraining()
+#pgdTraining()
